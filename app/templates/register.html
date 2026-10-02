@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Register — ComicCraft{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-icon"><i class="fa-solid fa-user-plus text-accent"></i></div>
+      <h1>Create Your Account</h1>
+      <p>Join ComicCraft and start creating AI comics</p>
+    </div>
+
+    <div id="authError" class="alert alert-error" style="display:none"></div>
+    <div id="authSuccess" class="alert alert-success" style="display:none"></div>
+
+    <form id="registerForm" class="auth-form" onsubmit="handleRegister(event)">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" class="form-input" placeholder="3–50 characters, letters/numbers/_" required minlength="3" maxlength="50" />
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" class="form-input" placeholder="your@email.com" required />
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" class="form-input" placeholder="At least 8 characters" required minlength="8" />
+      </div>
+      <div class="form-group">
+        <label for="password2">Confirm Password</label>
+        <input type="password" id="password2" name="password2" class="form-input" placeholder="Repeat your password" required />
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" id="registerBtn">
+        <span class="btn-text"><i class="fa-solid fa-user-plus"></i> Create Account</span>
+        <span class="btn-spinner" style="display:none"><i class="fa-solid fa-spinner fa-spin"></i> Creating account...</span>
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Already have an account? <a href="/login">Log in here</a></p>
+    </div>
+  </div>
+</div>
+
+<script>
+async function handleRegister(e) {
+  e.preventDefault();
+  const btn = document.getElementById('registerBtn');
+  const err = document.getElementById('authError');
+  const suc = document.getElementById('authSuccess');
+  err.style.display = 'none';
+  suc.style.display = 'none';
+
+  const pw = document.getElementById('password').value;
+  const pw2 = document.getElementById('password2').value;
+  if (pw !== pw2) {
+    err.textContent = 'Passwords do not match.';
+    err.style.display = 'block';
+    return;
+  }
+
+  btn.querySelector('.btn-text').style.display = 'none';
+  btn.querySelector('.btn-spinner').style.display = 'inline';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/auth/register', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        username: document.getElementById('username').value,
+        email: document.getElementById('email').value,
+        password: pw,
+      })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      suc.textContent = 'Account created! Redirecting to login...';
+      suc.style.display = 'block';
+      setTimeout(() => window.location.href = '/login', 1200);
+    } else {
+      let msg = data.detail;
+      if (Array.isArray(msg)) {
+        msg = msg.map(item => item.msg || JSON.stringify(item)).join(', ');
+      } else if (typeof msg === 'object' && msg !== null) {
+        msg = JSON.stringify(msg);
+      }
+      err.textContent = msg || 'Registration failed.';
+      err.style.display = 'block';
+    }
+  } catch(ex) {
+    err.textContent = 'Network error. Please try again.';
+    err.style.display = 'block';
+  } finally {
+    btn.querySelector('.btn-text').style.display = 'inline';
+    btn.querySelector('.btn-spinner').style.display = 'none';
+    btn.disabled = false;
+  }
+}
+</script>
+{% endblock %}

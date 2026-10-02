@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}ComicCraft — AI Comic Story Creator{% endblock %}</title>
+  <meta name="description" content="{% block description %}Transform your story ideas into illustrated comics with AI.{% endblock %}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  {% block head %}{% endblock %}
+</head>
+<body>
+  {% if demo_mode %}
+  <div class="demo-banner">
+    <span><i class="fa-solid fa-bolt"></i> DEMO MODE ACTIVE — Story and images use sample data. Set <code>DEMO_MODE=false</code> and add your API keys for real generation.</span>
+  </div>
+  {% endif %}
+
+  <!-- Navbar -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">
+        <span class="logo-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+        <span class="logo-text">Comic<span class="logo-accent">Craft</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="/" class="nav-link"><i class="fa-solid fa-house"></i> Home</a>
+        <a href="/library" class="nav-link"><i class="fa-solid fa-book-bookmark"></i> My Comics</a>
+        <a href="/create" class="nav-link"><i class="fa-solid fa-plus"></i> Create</a>
+        <a href="/about" class="nav-link"><i class="fa-solid fa-circle-info"></i> About</a>
+      </div>
+      <div class="nav-actions">
+        {% if user %}
+          <a href="/dashboard" class="nav-link nav-user"><i class="fa-solid fa-user"></i> {{ user.username }}</a>
+          <button onclick="handleLogout()" class="btn btn-ghost btn-sm"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+        {% else %}
+          <a href="/login" class="btn btn-ghost btn-sm"><i class="fa-solid fa-arrow-right-to-bracket"></i> Login</a>
+          <a href="/register" class="btn btn-primary btn-sm"><i class="fa-solid fa-user-plus"></i> Register</a>
+        {% endif %}
+      </div>
+      <button class="nav-hamburger" id="navHamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <!-- Mobile menu -->
+    <div class="nav-mobile" id="navMobile">
+      <a href="/" class="nav-link">Home</a>
+      <a href="/library" class="nav-link">My Comics</a>
+      <a href="/create" class="nav-link">Create</a>
+      <a href="/about" class="nav-link">About</a>
+      {% if user %}
+        <a href="/dashboard" class="nav-link">Dashboard</a>
+        <a href="/profile" class="nav-link">Profile</a>
+        <button onclick="handleLogout()" class="btn btn-ghost btn-sm" style="width:100%;margin-top:8px">Logout</button>
+      {% else %}
+        <a href="/login" class="btn btn-ghost btn-sm" style="width:100%;margin:4px 0">Login</a>
+        <a href="/register" class="btn btn-primary btn-sm" style="width:100%;margin:4px 0">Register</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo-text">Comic<span class="logo-accent">Craft</span></span>
+        <p>AI-powered comic story creator.</p>
+      </div>
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="/create">Create</a>
+        <a href="/library">Library</a>
+        <a href="/about">About</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 ComicCraft. Built with FastAPI + Gemini AI.</p>
+    </div>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

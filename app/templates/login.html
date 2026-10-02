@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Login — ComicCraft{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div class="auth-icon"><i class="fa-solid fa-key text-accent"></i></div>
+      <h1>Welcome Back</h1>
+      <p>Log in to access your comics</p>
+    </div>
+
+    <div id="authError" class="alert alert-error" style="display:none"></div>
+    <div id="authSuccess" class="alert alert-success" style="display:none"></div>
+
+    <form id="loginForm" class="auth-form" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" class="form-input" placeholder="Your username" required autocomplete="username" />
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" class="form-input" placeholder="Your password" required autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" id="loginBtn">
+        <span class="btn-text"><i class="fa-solid fa-arrow-right-to-bracket"></i> Log In</span>
+        <span class="btn-spinner" style="display:none"><i class="fa-solid fa-spinner fa-spin"></i> Logging in...</span>
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>Don't have an account? <a href="/register">Register here</a></p>
+    </div>
+  </div>
+</div>
+
+<script>
+const nextUrl = "{{ next | default('/dashboard') }}";
+
+async function handleLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('authError');
+  const suc = document.getElementById('authSuccess');
+  err.style.display = 'none';
+  suc.style.display = 'none';
+  btn.querySelector('.btn-text').style.display = 'none';
+  btn.querySelector('.btn-spinner').style.display = 'inline';
+  btn.disabled = true;
+
+  try {
+    const res = await fetch('/auth/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value,
+      })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      // Store token in cookie via JS
+      document.cookie = `access_token=${data.access_token}; path=/; max-age=${60*60*24*7}`;
+      suc.textContent = 'Login successful! Redirecting...';
+      suc.style.display = 'block';
+      setTimeout(() => window.location.href = nextUrl, 800);
+    } else {
+      let msg = data.detail;
+      if (Array.isArray(msg)) {
+        msg = msg.map(item => item.msg || JSON.stringify(item)).join(', ');
+      } else if (typeof msg === 'object' && msg !== null) {
+        msg = JSON.stringify(msg);
+      }
+      err.textContent = msg || 'Login failed. Check your credentials.';
+      err.style.display = 'block';
+    }
+  } catch(ex) {
+    err.textContent = 'Network error. Please try again.';
+    err.style.display = 'block';
+  } finally {
+    btn.querySelector('.btn-text').style.display = 'inline';
+    btn.querySelector('.btn-spinner').style.display = 'none';
+    btn.disabled = false;
+  }
+}
+</script>
+{% endblock %}

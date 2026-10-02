@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}{{ comic.title }} — ComicCraft{% endblock %}
+
+{% block content %}
+<div class="comic-preview-page">
+  <div class="container">
+
+    <!-- Comic Header -->
+    <div class="comic-header">
+      <div class="comic-header-info">
+        <div class="breadcrumb">
+          <a href="/library">← My Comics</a>
+          {% if comic.chapter_number > 1 %}
+          <span>/ Chapter {{ comic.chapter_number }}</span>
+          {% endif %}
+        </div>
+        <h1 class="comic-main-title">{{ comic.title }}</h1>
+        <div class="comic-meta-row">
+          <span class="tag">{{ comic.art_style }}</span>
+          <span class="tag tag-tone">{{ comic.tone }}</span>
+          <span class="tag tag-setting">{{ comic.setting }}</span>
+          {% if comic.chapter_number > 1 %}
+          <span class="tag tag-chapter">Chapter {{ comic.chapter_number }}</span>
+          {% endif %}
+        </div>
+        {% if comic.summary %}
+        <p class="comic-summary">{{ comic.summary }}</p>
+        {% endif %}
+      </div>
+      <div class="comic-header-actions">
+        <button onclick="downloadPDF('{{ comic.id }}')" class="btn btn-primary" id="pdfBtn">
+          <i class="fa-solid fa-file-pdf"></i> Download PDF
+        </button>
+        <button onclick="continueStory('{{ comic.id }}')" class="btn btn-outline" id="continueBtn">
+          <i class="fa-solid fa-arrow-turn-down"></i> Continue Story
+        </button>
+        <button onclick="regenerateComic('{{ comic.id }}')" class="btn btn-ghost" id="regenerateBtn">
+          <i class="fa-solid fa-arrows-rotate"></i> Regenerate Comic
+        </button>
+        <button onclick="toggleFavorite('{{ comic.id }}')" class="btn btn-ghost" id="favBtn"
+          data-favorite="{{ 'true' if comic.is_favorite else 'false' }}">
+          <i class="{{ 'fa-solid fa-star' if comic.is_favorite else 'fa-regular fa-star' }}"></i> {{ 'Unfavorite' if comic.is_favorite else 'Favorite' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Status Bar (for in-progress comics) -->
+    {% set incomplete_panels = comic.panels | selectattr('generation_status', 'ne', 'COMPLETED') | list %}
+    {% if incomplete_panels %}
+    <div class="status-bar warning" id="statusBar">
+      <i class="fa-solid fa-triangle-exclamation"></i> Some panels are still generating. This page will refresh automatically.
+    </div>
+    {% endif %}
+
+    <!-- Comic Panels Grid -->
+    <div class="panels-grid" id="panelsGrid">
+      {% for panel in comic.panels %}
+      <div class="comic-panel" id="panel-{{ panel.panel_number }}" data-panel="{{ panel.panel_number }}">
+
+        <!-- Panel Header -->
+        <div class="panel-header">
+          <div class="panel-number">{{ panel.panel_number }}</div>
+          <div class="panel-title">{{ panel.title }}</div>
+          <button class="btn btn-sm btn-ghost regen-panel-btn"
+            onclick="regeneratePanel('{{ comic.id }}', {{ panel.panel_number }})"
+            data-panel="{{ panel.panel_number }}"
+            title="Regenerate this panel">
+            <i class="fa-solid fa-arrows-rotate"></i>
+          </button>
+        </div>
+
+        <!-- Panel Image -->
+        <div class="panel-image-wrap">
+          {% if panel.image_url %}
+          <img src="{{ panel.image_url }}" alt="{{ panel.title }}" class="panel-image" loading="lazy" />
+          {% elif panel.generation_status == 'FAILED' %}
+          <div class="panel-image-placeholder error">
+            <span><i class="fa-solid fa-triangle-exclamation"></i></span>
+            <p>Image generation failed</p>
+          </div>
+          {% else %}
+          <div class="panel-image-placeholder" id="panel-img-{{ panel.panel_number }}">
+            <span><i class="fa-solid fa-spinner fa-spin"></i></span>
+            <p>Generating image...</p>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Narration caption -->
+        {% if panel.narration %}
+        <div class="panel-narration">
+          <div class="narration-box">{{ panel.narration }}</div>
+        </div>
+        {% endif %}
+
+        <!-- Scene description -->
+        {% if panel.scene_description %}
+        <div class="panel-scene">
+          <span class="scene-label"><i class="fa-solid fa-location-dot"></i> Scene:</span>
+          {{ panel.scene_description }}
+        </div>
+        {% endif %}
+
+        <!-- Dialogue bubbles -->
+        {% if panel.dialogue %}
+        <div class="panel-dialogue">
+          {% for line in panel.dialogue %}
+          <div class="dialogue-bubble">
+            <div class="bubble-character">{{ line.character }}</div>
+            <div class="bubble-text">"{{ line.text }}"</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+
+      </div>
+      {% endfor %}
+
+      {% if not comic.panels %}
+      <div class="empty-state" style="grid-column:1/-1">
+        <div class="empty-icon"><i class="fa-solid fa-spinner fa-spin text-muted"></i></div>
+        <h3>Panels are being generated...</h3>
+        <p>This page will refresh when your comic is ready.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Bottom Actions -->
+    <div class="comic-bottom-actions">
+      <a href="/library" class="btn btn-outline"><i class="fa-solid fa-arrow-left"></i> Back to Library</a>
+      <button onclick="downloadPDF('{{ comic.id }}')" class="btn btn-primary"><i class="fa-solid fa-file-pdf"></i> Download PDF</button>
+      <button onclick="continueStory('{{ comic.id }}')" class="btn btn-outline"><i class="fa-solid fa-arrow-turn-down"></i> Continue Story</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Regenerating overlay -->
+<div id="regenOverlay" class="regen-overlay" style="display:none">
+  <div class="regen-modal">
+    <div class="regen-spinner"><i class="fa-solid fa-arrows-rotate fa-spin text-accent"></i></div>
+    <div id="regenMessage">Regenerating...</div>
+  </div>
+</div>
+
+<script src="/static/js/comic.js"></script>
+{% endblock %}

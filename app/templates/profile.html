@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Profile — ComicCraft{% endblock %}
+
+{% block content %}
+<div class="profile-page">
+  <div class="container" style="max-width:600px">
+    <div class="profile-card">
+      <div class="profile-avatar">{{ user.username[0].upper() }}</div>
+      <h1>{{ user.username }}</h1>
+      <p class="profile-email">{{ user.email }}</p>
+      <div class="profile-stats">
+        <div class="stat-chip">
+          <span class="stat-n">{{ total_comics }}</span>
+          <span>Comics</span>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-n">{{ user.created_at.strftime('%b %Y') if user.created_at else 'N/A' }}</span>
+          <span>Member since</span>
+        </div>
+      </div>
+      <div class="profile-actions">
+        <a href="/create" class="btn btn-primary"><i class="fa-solid fa-palette"></i> Create New Comic</a>
+        <a href="/library" class="btn btn-outline"><i class="fa-solid fa-book-bookmark"></i> My Comics</a>
+        <button onclick="handleLogout()" class="btn btn-ghost"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

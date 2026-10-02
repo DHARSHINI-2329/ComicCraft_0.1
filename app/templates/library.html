@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}My Comics — ComicCraft{% endblock %}
+
+{% block content %}
+<div class="library-page">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="library-header">
+      <div>
+        <h1>My Comic Library <i class="fa-solid fa-book-bookmark text-accent"></i></h1>
+        <p>All your created comics in one place.</p>
+      </div>
+      <a href="/create" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Create New</a>
+    </div>
+
+    <!-- Search & Filters -->
+    <div class="library-filters">
+      <form method="GET" action="/library" class="search-form">
+        <div class="search-wrap">
+          <input type="text" name="search" value="{{ search }}" placeholder="Search by title, character, setting..."
+            class="form-input search-input" />
+          <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+        </div>
+        <div class="filter-tabs">
+          <a href="/library?filter=all{% if search %}&search={{ search }}{% endif %}"
+            class="filter-tab {% if filter == 'all' %}active{% endif %}">All</a>
+          <a href="/library?filter=favorites{% if search %}&search={{ search }}{% endif %}"
+            class="filter-tab {% if filter == 'favorites' %}active{% endif %}"><i class="fa-solid fa-star"></i> Favorites</a>
+        </div>
+      </form>
+    </div>
+
+    <!-- Comics Grid -->
+    {% if comics %}
+    <div class="comics-grid" id="comicsGrid">
+      {% for comic in comics %}
+      <div class="comic-card" id="comic-card-{{ comic.id }}">
+        <div class="comic-thumbnail">
+          {% if comic.thumbnail_url %}
+          <img src="{{ comic.thumbnail_url }}" alt="{{ comic.title }}" loading="lazy" />
+          {% else %}
+          <div class="thumbnail-placeholder"><i class="fa-solid fa-image text-muted"></i></div>
+          {% endif %}
+          {% if comic.chapter_number > 1 %}
+          <div class="chapter-badge">Ch. {{ comic.chapter_number }}</div>
+          {% endif %}
+          <button class="fav-btn {% if comic.is_favorite %}active{% endif %}"
+            onclick="toggleFavLib('{{ comic.id }}', this)"
+            title="{{ 'Remove from favorites' if comic.is_favorite else 'Add to favorites' }}">
+            <i class="{{ 'fa-solid fa-star' if comic.is_favorite else 'fa-regular fa-star' }}"></i>
+          </button>
+        </div>
+        <div class="comic-info">
+          <h3 class="comic-title">{{ comic.title }}</h3>
+          <div class="comic-meta">
+            <span class="tag">{{ comic.art_style }}</span>
+            <span class="tag tag-tone">{{ comic.tone }}</span>
+          </div>
+          <div class="comic-detail-row">
+            <span><i class="fa-solid fa-user"></i> {{ comic.character_name }}</span>
+            <span><i class="fa-solid fa-location-dot"></i> {{ comic.setting }}</span>
+          </div>
+          <div class="comic-detail-row">
+            <span class="panel-count">{{ comic.panels | length }} panels</span>
+            <span class="comic-date">{{ comic.created_at.strftime('%b %d, %Y') if comic.created_at else '' }}</span>
+          </div>
+          <div class="comic-card-actions">
+            <a href="/comic/{{ comic.id }}" class="btn btn-sm btn-primary"><i class="fa-solid fa-eye"></i> View</a>
+            <a href="/api/comics/{{ comic.id }}/pdf" class="btn btn-sm btn-outline" target="_blank"><i class="fa-solid fa-file-pdf"></i> PDF</a>
+            <button onclick="continueStoryLib('{{ comic.id }}')" class="btn btn-sm btn-ghost"><i class="fa-solid fa-arrow-turn-down"></i> Continue</button>
+            <button onclick="deleteComic('{{ comic.id }}')" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i> Delete</button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon"><i class="fa-solid fa-box-open text-muted"></i></div>
+      {% if search %}
+      <h3>No comics found for "{{ search }}"</h3>
+      <p>Try a different search term.</p>
+      <a href="/library" class="btn btn-outline">Clear Search</a>
+      {% elif filter == 'favorites' %}
+      <h3>No favorite comics yet.</h3>
+      <p>Star your comics to add them to favorites.</p>
+      <a href="/library" class="btn btn-outline">View All Comics</a>
+      {% else %}
+      <h3>Your comic shelf is empty.</h3>
+      <p>Create your first comic and it will appear here!</p>
+      <a href="/create" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Create Your First Comic</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<script>
+async function deleteComic(comicId) {
+  if (!confirm('Are you sure you want to delete this comic? This cannot be undone.')) return;
+  try {
+    const res = await fetch('/api/comics/' + comicId, { method: 'DELETE' });
+    if (res.ok) {
+      const card = document.getElementById('comic-card-' + comicId);
+      if (card) card.remove();
+    } else {
+      alert('Delete failed. Please try again.');
+    }
+  } catch(e) {
+    alert('Network error.');
+  }
+}
+
+async function toggleFavLib(comicId, btn) {
+  try {
+    const res = await fetch('/api/comics/' + comicId + '/favorite', { method: 'POST' });
+    if (res.ok) {
+      const data = await res.json();
+      btn.innerHTML = `<i class="${data.is_favorite ? 'fa-solid fa-star' : 'fa-regular fa-star'}"></i>`;
+      btn.classList.toggle('active', data.is_favorite);
+    }
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+async function continueStoryLib(comicId) {
+  if (!confirm('Continue this story? A new chapter will be generated using your existing character and story context.')) return;
+  try {
+    const res = await fetch('/api/comics/' + comicId + '/continue', { method: 'POST' });
+    if (res.ok) {
+      const data = await res.json();
+      window.location.href = '/generating/' + data.comic_id + '?job_id=' + data.job_id;
+    } else {
+      const err = await res.json();
+      alert(err.detail || 'Failed to start continuation.');
+    }
+  } catch(e) {
+    alert('Network error.');
+  }
+}
+</script>
+{% endblock %}

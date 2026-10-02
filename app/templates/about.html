@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}About — ComicCraft{% endblock %}
+
+{% block content %}
+<div class="about-page">
+  <div class="container" style="max-width:800px">
+
+    <div class="about-header">
+      <h1>About ComicCraft</h1>
+      <p>An end-to-end AI comic story creator powered by Gemini and generative image models.</p>
+    </div>
+
+    <div class="about-section">
+      <h2>What is ComicCraft?</h2>
+      <p>ComicCraft transforms a user's story idea into a complete illustrated 5-panel comic. You provide the story idea, character, setting, tone, and art style — the AI does the rest.</p>
+    </div>
+
+    <div class="about-section">
+      <h2>How It Works</h2>
+      <div class="pipeline">
+        <div class="pipeline-step"><span>Your Idea</span></div>
+        <div class="pipeline-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        <div class="pipeline-step"><span>Gemini AI</span></div>
+        <div class="pipeline-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        <div class="pipeline-step"><span>5-Panel Outline</span></div>
+        <div class="pipeline-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        <div class="pipeline-step"><span>Image Generation</span></div>
+        <div class="pipeline-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+        <div class="pipeline-step"><span>PDF Export</span></div>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <h2>Technology Stack</h2>
+      <div class="tech-grid">
+        <div class="tech-card"><strong>Backend</strong><span>FastAPI + Python</span></div>
+        <div class="tech-card"><strong>AI Stories</strong><span>Google Gemini API</span></div>
+        <div class="tech-card"><strong>Images</strong><span>Gemini / Hugging Face SD</span></div>
+        <div class="tech-card"><strong>Database</strong><span>SQLite + SQLAlchemy</span></div>
+        <div class="tech-card"><strong>PDF</strong><span>FPDF2</span></div>
+        <div class="tech-card"><strong>Frontend</strong><span>Vanilla JS + Jinja2</span></div>
+      </div>
+    </div>
+
+    <div class="about-section">
+      <h2>Key Features</h2>
+      <ul class="feature-list">
+        <li><i class="fa-solid fa-circle-check text-success"></i> AI-generated 5-panel comic outlines with structured JSON validation</li>
+        <li><i class="fa-solid fa-circle-check text-success"></i> Character consistency across all panels via visual identity profiles</li>
+        <li><i class="fa-solid fa-circle-check text-success"></i> Pluggable image generation (Gemini, HuggingFace, or demo mock)</li>
+        <li><i class="fa-solid fa-circle-check text-success"></i> Per-panel regeneration without affecting other panels</li>
+        <li><i class="fa-solid fa-circle-check text-success"></i> Story continuation into new chapters with memory of previous events</li>
+        <li><i class="fa-solid fa-circle-check text-success"></i> Professional PDF export with cover page, panels, narration, dialogue</li>
+        <li><i class="fa-solid fa-circle-check text-success"></i> Comic library with favorites, search, and delete</li>
+        <li><i class="fa-solid fa-circle-check text-success"></i> Secure user authentication with bcrypt + JWT</li>
+        <li><i class="fa-solid fa-circle-check text-success"></i> Background generation jobs with real-time status polling</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

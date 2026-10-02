@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Comic Ready! — ComicCraft{% endblock %}
+
+{% block content %}
+<div class="export-success-page">
+  <div class="container" style="max-width:600px;text-align:center">
+    <div class="success-icon"><i class="fa-solid fa-circle-check text-success" style="font-size:3.5rem"></i></div>
+    <h1>Your Comic is Ready!</h1>
+    <p class="success-subtitle">{{ comic.title }} has been exported successfully.</p>
+
+    <div class="success-actions">
+      <a href="/api/comics/{{ comic.id }}/pdf" class="btn btn-primary btn-lg" target="_blank">
+        <i class="fa-solid fa-file-pdf"></i> Download PDF
+      </a>
+      <a href="/comic/{{ comic.id }}" class="btn btn-outline btn-lg">
+        <i class="fa-solid fa-eye"></i> View Comic
+      </a>
+      <a href="/create" class="btn btn-ghost btn-lg">
+        <i class="fa-solid fa-palette"></i> Create Another Comic
+      </a>
+      <button onclick="continueStory('{{ comic.id }}')" class="btn btn-ghost btn-lg">
+        <i class="fa-solid fa-arrow-turn-down"></i> Continue Story
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+async function continueStory(comicId) {
+  if (!confirm('Continue this story into chapter 2?')) return;
+  const res = await fetch('/api/comics/' + comicId + '/continue', { method: 'POST' });
+  if (res.ok) {
+    const data = await res.json();
+    window.location.href = '/generating/' + data.comic_id + '?job_id=' + data.job_id;
+  } else {
+    alert('Failed to start continuation.');
+  }
+}
+</script>
+{% endblock %}

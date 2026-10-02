@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — ComicCraft{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+  <div class="container">
+
+    <!-- Header -->
+    <div class="dashboard-header">
+      <div>
+        <h1>Welcome back, <span class="text-accent">{{ user.username }}</span> <i class="fa-regular fa-hand text-accent"></i></h1>
+        <p>Here's your comic creation overview.</p>
+      </div>
+      <a href="/create" class="btn btn-primary">
+        <i class="fa-solid fa-palette"></i> Create New Comic
+      </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number">{{ total_comics }}</div>
+        <div class="stat-label">Total Comics</div>
+        <div class="stat-icon"><i class="fa-solid fa-book-bookmark text-secondary"></i></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ total_favorites }}</div>
+        <div class="stat-label">Favorites</div>
+        <div class="stat-icon"><i class="fa-solid fa-star text-accent"></i></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ total_chapters }}</div>
+        <div class="stat-label">Continued Chapters</div>
+        <div class="stat-icon"><i class="fa-solid fa-layer-group text-secondary"></i></div>
+      </div>
+      <div class="stat-card">
+        <a href="/create" style="text-decoration:none;color:inherit;display:block">
+          <div class="stat-number">+</div>
+          <div class="stat-label">Create New</div>
+          <div class="stat-icon"><i class="fa-solid fa-wand-magic-sparkles text-accent"></i></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+      <h2>Quick Actions</h2>
+      <div class="action-cards">
+        <a href="/create" class="action-card">
+          <div class="action-icon"><i class="fa-solid fa-palette text-secondary"></i></div>
+          <h3>New Comic</h3>
+          <p>Start a brand new story</p>
+        </a>
+        <a href="/library" class="action-card">
+          <div class="action-icon"><i class="fa-solid fa-book-bookmark text-secondary"></i></div>
+          <h3>My Library</h3>
+          <p>View all your comics</p>
+        </a>
+        <a href="/library?filter=favorites" class="action-card">
+          <div class="action-icon"><i class="fa-solid fa-star text-accent"></i></div>
+          <h3>Favorites</h3>
+          <p>Your starred comics</p>
+        </a>
+        <a href="/profile" class="action-card">
+          <div class="action-icon"><i class="fa-solid fa-user text-secondary"></i></div>
+          <h3>Profile</h3>
+          <p>Manage your account</p>
+        </a>
+      </div>
+    </div>
+
+    <!-- Recent Comics -->
+    <div class="recent-section">
+      <div class="section-row">
+        <h2>Recent Comics</h2>
+        <a href="/library" class="link-arrow">View all <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+      {% if recent_comics %}
+      <div class="comics-grid">
+        {% for comic in recent_comics %}
+        <div class="comic-card" data-comic-id="{{ comic.id }}">
+          <div class="comic-thumbnail">
+            {% if comic.thumbnail_url %}
+            <img src="{{ comic.thumbnail_url }}" alt="{{ comic.title }}" loading="lazy" />
+            {% else %}
+            <div class="thumbnail-placeholder"><i class="fa-solid fa-image text-muted"></i></div>
+            {% endif %}
+            {% if comic.chapter_number > 1 %}
+            <div class="chapter-badge">Ch. {{ comic.chapter_number }}</div>
+            {% endif %}
+            {% if comic.is_favorite %}
+            <div class="fav-badge"><i class="fa-solid fa-star"></i></div>
+            {% endif %}
+          </div>
+          <div class="comic-info">
+            <h3 class="comic-title">{{ comic.title }}</h3>
+            <div class="comic-meta">
+              <span class="tag">{{ comic.art_style }}</span>
+              <span class="tag tag-tone">{{ comic.tone }}</span>
+            </div>
+            <div class="comic-actions">
+              <a href="/comic/{{ comic.id }}" class="btn btn-sm btn-primary"><i class="fa-solid fa-eye"></i> View</a>
+              <a href="/api/comics/{{ comic.id }}/pdf" class="btn btn-sm btn-outline" target="_blank"><i class="fa-solid fa-file-pdf"></i> PDF</a>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon"><i class="fa-solid fa-box-open text-muted"></i></div>
+        <h3>Your comic shelf is empty.</h3>
+        <p>Create your first comic and it will appear here!</p>
+        <a href="/create" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Create Your First Comic</a>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}

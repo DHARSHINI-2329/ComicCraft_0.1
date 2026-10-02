@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}ComicCraft — Turn Your Ideas Into Comics{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge"><i class="fa-solid fa-wand-magic-sparkles"></i> AI-Powered Comic Creator</div>
+    <h1 class="hero-title">Turn Your <span class="text-accent">Imagination</span> Into a Comic.</h1>
+    <p class="hero-subtitle">Create original characters, stories, and illustrated comic panels with the power of AI. No drawing skills required.</p>
+    <div class="hero-actions">
+      <a href="/create" class="btn btn-primary btn-lg">
+        <i class="fa-solid fa-palette"></i> Create Your Comic
+      </a>
+      {% if user %}
+      <a href="/library" class="btn btn-outline btn-lg">
+        <i class="fa-solid fa-book-bookmark"></i> My Comics
+      </a>
+      {% else %}
+      <a href="/register" class="btn btn-outline btn-lg">
+        <i class="fa-solid fa-rocket"></i> Get Started Free
+      </a>
+      {% endif %}
+    </div>
+    <div class="hero-note">Free to use &bull; No credit card required &bull; Powered by Gemini AI</div>
+  </div>
+  <div class="hero-visual">
+    <div class="comic-preview-mock">
+      <div class="mock-panel mock-panel-1">
+        <div class="mock-caption">A brave fox enters the enchanted forest...</div>
+        <div class="mock-img-area"><i class="fa-solid fa-paw text-secondary"></i></div>
+        <div class="mock-bubble">"Something glows ahead..."</div>
+      </div>
+      <div class="mock-panel mock-panel-2">
+        <div class="mock-caption">She discovers a mysterious door.</div>
+        <div class="mock-img-area"><i class="fa-solid fa-door-open text-accent"></i></div>
+        <div class="mock-bubble">"What could this be?"</div>
+      </div>
+      <div class="mock-panel mock-panel-3">
+        <div class="mock-caption">An owl guardian blocks the way.</div>
+        <div class="mock-img-area"><i class="fa-solid fa-feather-pointed"></i></div>
+        <div class="mock-bubble">"Solve the riddle!"</div>
+      </div>
+    </div>
+    <div class="hero-tag">Sample Comic Preview</div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="features">
+  <div class="container">
+    <div class="section-header">
+      <h2>Everything You Need to Create Comics</h2>
+      <p>From story idea to illustrated PDF — all in one place.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-book-open text-secondary"></i></div>
+        <h3>AI Storytelling</h3>
+        <p>Gemini AI transforms your idea into a structured 5-panel story with narration and dialogue.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-masks-theater text-accent"></i></div>
+        <h3>Character Consistency</h3>
+        <p>Your character's appearance, clothing, and visual identity stay consistent across every panel.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-image text-secondary"></i></div>
+        <h3>Illustrated Panels</h3>
+        <p>Each panel gets a unique AI-generated illustration that brings your story to life.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-file-pdf text-accent"></i></div>
+        <h3>PDF Export</h3>
+        <p>Download your finished comic as a professionally formatted PDF ready to share.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-arrows-rotate text-secondary"></i></div>
+        <h3>Panel Regeneration</h3>
+        <p>Not happy with a panel? Regenerate just that one without touching the rest.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fa-solid fa-layer-group text-accent"></i></div>
+        <h3>Story Continuation</h3>
+        <p>Extend your story into chapter 2, 3, and beyond. The AI remembers your characters and events.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="how-it-works">
+  <div class="container">
+    <div class="section-header">
+      <h2>How It Works</h2>
+      <p>From idea to illustrated comic in minutes.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-number">01</div>
+        <div class="step-content">
+          <h3>Describe Your Story</h3>
+          <p>Give us your story idea, character name, setting, tone, and art style.</p>
+        </div>
+      </div>
+      <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="step">
+        <div class="step-number">02</div>
+        <div class="step-content">
+          <h3>AI Generates the Story</h3>
+          <p>Gemini AI creates a 5-panel outline with narration, dialogue, and scene descriptions.</p>
+        </div>
+      </div>
+      <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="step">
+        <div class="step-number">03</div>
+        <div class="step-content">
+          <h3>Illustrations Are Created</h3>
+          <p>Each panel gets a detailed illustration with your character rendered consistently.</p>
+        </div>
+      </div>
+      <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+      <div class="step">
+        <div class="step-number">04</div>
+        <div class="step-content">
+          <h3>Download Your Comic</h3>
+          <p>Preview, regenerate panels, then export as a beautiful PDF to share anywhere.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-card">
+      <h2>Ready to Create Your First Comic?</h2>
+      <p>Join ComicCraft and bring your story ideas to life with AI.</p>
+      <a href="/create" class="btn btn-primary btn-lg">Start Creating Now <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+  </div>
+</section>
+{% endblock %}

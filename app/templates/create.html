@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Create Comic — ComicCraft{% endblock %}
+{% block description %}Create your AI-illustrated comic. Enter your story idea, character, and style.{% endblock %}
+
+{% block content %}
+<div class="create-page">
+  <div class="container">
+
+    <div class="create-layout">
+
+      <!-- Left: Form -->
+      <div class="create-form-col">
+        <div class="create-header">
+          <h1>Create Your Comic</h1>
+          <p>Fill in the details below and let AI do the magic.</p>
+        </div>
+
+        <div id="createError" class="alert alert-error" style="display:none"></div>
+
+        <form id="createForm" onsubmit="handleCreate(event)">
+
+          <!-- Section: Story -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <span class="section-num">01</span>
+              <h2>Your Story</h2>
+            </div>
+            <div class="form-group">
+              <label for="story_prompt">Story Idea <span class="required">*</span></label>
+              <textarea id="story_prompt" name="story_prompt" class="form-input form-textarea"
+                placeholder="A brave fox discovers a mysterious glowing door inside an enchanted forest..."
+                rows="4" required minlength="10" maxlength="2000"></textarea>
+              <span class="form-hint">Describe your story idea in detail. The more you write, the better the comic.</span>
+            </div>
+          </div>
+
+          <!-- Section: Character -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <span class="section-num">02</span>
+              <h2>Your Character</h2>
+            </div>
+            <div class="form-group">
+              <label for="character_name">Character Name <span class="required">*</span></label>
+              <input type="text" id="character_name" name="character_name" class="form-input"
+                placeholder="e.g. Luna" required />
+            </div>
+            <div class="form-group">
+              <label for="character_description">Character Description <span class="optional">(optional)</span></label>
+              <textarea id="character_description" name="character_description" class="form-input form-textarea"
+                placeholder="A young orange fox with a blue scarf, emerald eyes, brave and curious..."
+                rows="3"></textarea>
+              <span class="form-hint">Describe appearance, clothing, species, age. This helps maintain visual consistency.</span>
+            </div>
+          </div>
+
+          <!-- Section: World -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <span class="section-num">03</span>
+              <h2>Your World</h2>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="setting">Setting <span class="required">*</span></label>
+                <select id="setting" name="setting" class="form-input form-select" required>
+                  <option value="">Choose setting...</option>
+                  <option value="Enchanted Forest">Enchanted Forest</option>
+                  <option value="Forest">Forest</option>
+                  <option value="School">School</option>
+                  <option value="City">City</option>
+                  <option value="Space">Space</option>
+                  <option value="Fantasy Kingdom">Fantasy Kingdom</option>
+                  <option value="Beach">Beach</option>
+                  <option value="Laboratory">Laboratory</option>
+                  <option value="Custom">Custom...</option>
+                </select>
+              </div>
+              <div class="form-group" id="customSettingGroup" style="display:none">
+                <label for="custom_setting">Custom Setting</label>
+                <input type="text" id="custom_setting" name="custom_setting" class="form-input"
+                  placeholder="Describe your setting" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="tone">Story Tone <span class="required">*</span></label>
+              <select id="tone" name="tone" class="form-input form-select" required>
+                <option value="">Choose tone...</option>
+                <option value="Adventure">Adventure</option>
+                <option value="Light-hearted">Light-hearted</option>
+                <option value="Dramatic">Dramatic</option>
+                <option value="Funny">Funny</option>
+                <option value="Emotional">Emotional</option>
+                <option value="Mysterious">Mysterious</option>
+                <option value="Poetic">Poetic</option>
+                <option value="Dark">Dark</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Section: Style -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <span class="section-num">04</span>
+              <h2>Art Style</h2>
+            </div>
+            <div class="style-grid" id="styleGrid">
+              {% for style in ["Anime","Comic Book","Cartoon","Pixel Art","Fantasy","Watercolor","Cinematic","Realistic"] %}
+              <label class="style-option" for="style_{{ style | lower | replace(' ','_') }}">
+                <input type="radio" id="style_{{ style | lower | replace(' ','_') }}"
+                  name="art_style" value="{{ style }}"
+                  {% if style == "Comic Book" %}checked{% endif %} />
+                <span class="style-label">{{ style }}</span>
+              </label>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Submit -->
+          <div class="form-submit">
+            <button type="submit" class="btn btn-primary btn-lg btn-full" id="generateBtn">
+              <span class="btn-text"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate My Comic</span>
+              <span class="btn-spinner" style="display:none"><i class="fa-solid fa-spinner fa-spin"></i> Starting generation...</span>
+            </button>
+            <p class="submit-note">Generation takes 1–3 minutes. You'll be taken to a progress screen.</p>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- Right: Preview -->
+      <div class="create-preview-col">
+        <div class="preview-panel sticky-preview">
+          <div class="preview-title"><i class="fa-solid fa-clipboard-list text-secondary"></i> Story Preview</div>
+          <div class="preview-content" id="previewContent">
+            <div class="preview-placeholder">
+              <div class="preview-icon"><i class="fa-solid fa-masks-theater text-muted"></i></div>
+              <p>Fill in your story details and your comic preview will appear here.</p>
+            </div>
+          </div>
+          <div class="preview-example">
+            <div class="preview-example-title"><i class="fa-solid fa-lightbulb text-accent"></i> Example Prompt</div>
+            <div class="preview-example-text">
+              "A brave fox discovers a mysterious glowing door inside an enchanted forest. She must solve an ancient riddle to unlock its secrets."
+            </div>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="fillExample()"><i class="fa-solid fa-wand-sparkles"></i> Use This Example</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/create.js"></script>
+{% endblock %}
