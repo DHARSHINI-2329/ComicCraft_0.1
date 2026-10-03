@@ -1,9 +1,14 @@
 """GenerationJob model for tracking async comic generation tasks."""
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from sqlalchemy import String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.database import Base
+
+if TYPE_CHECKING:
+    from app.models.comic import Comic
 
 
 class GenerationJob(Base):
@@ -23,4 +28,4 @@ class GenerationJob(Base):
     completed_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
 
     # Relationships
-    comic: Mapped["Comic"] = relationship("Comic", back_populates="generation_jobs")
+    comic: Mapped[Comic] = relationship("Comic", back_populates="generation_jobs")

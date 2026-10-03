@@ -1,9 +1,14 @@
 """Character model."""
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from sqlalchemy import String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.database import Base
+
+if TYPE_CHECKING:
+    from app.models.comic import Comic
 
 
 class Character(Base):
@@ -21,4 +26,4 @@ class Character(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     # Relationships
-    comic: Mapped["Comic"] = relationship("Comic", back_populates="character")
+    comic: Mapped[Comic] = relationship("Comic", back_populates="character")

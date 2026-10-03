@@ -81,7 +81,7 @@
         <div class="comic-card" data-comic-id="{{ comic.id }}">
           <div class="comic-thumbnail">
             {% if comic.thumbnail_url %}
-            <img src="{{ comic.thumbnail_url }}" alt="{{ comic.title }}" loading="lazy" />
+            <img src="{{ comic.thumbnail_url }}" alt="{{ comic.title }}" loading="lazy" onerror="this.onerror=null; this.src='/static/images/comic-fallback.svg';" />
             {% else %}
             <div class="thumbnail-placeholder"><i class="fa-solid fa-image text-muted"></i></div>
             {% endif %}

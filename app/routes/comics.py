@@ -50,7 +50,7 @@ async def generate_comic_json(
         art_style=data.art_style,
     )
     job = comic_svc.create_job(db=db, comic_id=comic.id, job_type="FULL_COMIC")
-    _run_in_thread(run_full_generation, db, comic, job)
+    _run_in_thread(run_full_generation, comic.id, job.id)
 
     return GenerateComicResponse(
         success=True,
@@ -107,7 +107,7 @@ async def regenerate_panel(
     if not panel:
         raise HTTPException(status_code=404, detail="Panel not found")
     job = comic_svc.create_job(db=db, comic_id=comic.id, job_type="PANEL", panel_number=panel_number)
-    _run_in_thread(run_panel_regeneration, db, comic, panel, job)
+    _run_in_thread(run_panel_regeneration, comic.id, panel.panel_number, job.id)
     return {"success": True, "job_id": job.id, "panel_number": panel_number}
 
 
@@ -130,7 +130,7 @@ async def regenerate_comic(
         db.delete(comic.character)
     db.commit()
     job = comic_svc.create_job(db=db, comic_id=comic.id, job_type="FULL_COMIC")
-    _run_in_thread(run_full_generation, db, comic, job)
+    _run_in_thread(run_full_generation, comic.id, job.id)
     return {"success": True, "job_id": job.id, "comic_id": comic.id}
 
 
@@ -161,7 +161,7 @@ async def continue_story(
         parent_comic_id=parent_comic.id,
     )
     job = comic_svc.create_job(db=db, comic_id=new_comic.id, job_type="FULL_COMIC")
-    _run_in_thread(run_story_continuation, db, parent_comic, new_comic, job)
+    _run_in_thread(run_story_continuation, parent_comic.id, new_comic.id, job.id)
 
     return {
         "success": True,

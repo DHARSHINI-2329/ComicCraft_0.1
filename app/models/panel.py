@@ -1,9 +1,14 @@
 """Panel model."""
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from sqlalchemy import String, Text, DateTime, Integer, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.database import Base
+
+if TYPE_CHECKING:
+    from app.models.comic import Comic
 
 
 class Panel(Base):
@@ -23,4 +28,4 @@ class Panel(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
-    comic: Mapped["Comic"] = relationship("Comic", back_populates="panels")
+    comic: Mapped[Comic] = relationship("Comic", back_populates="panels")

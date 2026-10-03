@@ -11,6 +11,8 @@ from app.services.character_service import CharacterService
 from app.services.image_service import ImageService
 from app.utils.file_utils import new_id
 
+from app.database.database import SessionLocal
+
 logger = logging.getLogger(__name__)
 
 story_svc = StoryService()
@@ -21,8 +23,9 @@ image_svc = ImageService()
 def _update_job(db: Session, job: GenerationJob, status: str, step: str | None = None, error: str | None = None):
     """Update a generation job's status."""
     job.status = status
-    job.current_step = step
-    if error:
+    if step is not None:
+        job.current_step = step
+    if error is not None:
         job.error_message = error
     if status == "RUNNING" and not job.started_at:
         job.started_at = datetime.now(timezone.utc)
@@ -31,17 +34,16 @@ def _update_job(db: Session, job: GenerationJob, status: str, step: str | None =
     db.commit()
 
 
-def run_full_generation(db: Session, comic: Comic, job: GenerationJob) -> None:
-    """Execute the complete comic generation pipeline synchronously.
-
-    Steps:
-      1. Generate story outline (Gemini)
-      2. Persist character profile
-      3. Create panel records
-      4. Generate panel images (one per panel)
-      5. Mark job complete
-    """
+def run_full_generation(comic_id: str, job_id: str) -> None:
+    """Execute the complete comic generation pipeline in background thread with own DB session."""
+    db: Session = SessionLocal()
     try:
+        comic = db.query(Comic).filter(Comic.id == comic_id).first()
+        job = db.query(GenerationJob).filter(GenerationJob.id == job_id).first()
+        if not comic or not job:
+            logger.error(f"run_full_generation: comic {comic_id} or job {job_id} not found")
+            return
+
         _update_job(db, job, "RUNNING", "Planning the story...")
 
         # ── Step 1: Story outline ─────────────────────────────────────────
@@ -103,24 +105,38 @@ def run_full_generation(db: Session, comic: Comic, job: GenerationJob) -> None:
 
         failed = [p for p, ok in results.items() if not ok]
         if failed:
-            logger.warning(f"Comic {comic.id}: image generation failed for panels {failed}")
+            logger.warning(f"Comic {comic.id}: image generation fallback applied for panels {failed}")
 
         _update_job(db, job, "COMPLETED", "Comic ready!")
         logger.info(f"Comic {comic.id} generation complete.")
 
     except Exception as e:
-        logger.exception(f"Comic generation failed for {comic.id}: {e}")
-        _update_job(db, job, "FAILED", error=str(e))
+        logger.exception(f"Comic generation failed for {comic_id}: {e}")
+        try:
+            job = db.query(GenerationJob).filter(GenerationJob.id == job_id).first()
+            if job:
+                _update_job(db, job, "FAILED", error=str(e))
+        except Exception:
+            pass
+    finally:
+        db.close()
 
 
 def run_panel_regeneration(
-    db: Session,
-    comic: Comic,
-    panel: Panel,
-    job: GenerationJob,
+    comic_id: str,
+    panel_number: int,
+    job_id: str,
 ) -> None:
-    """Regenerate a single panel's story content and image."""
+    """Regenerate a single panel's story content and image in background thread."""
+    db: Session = SessionLocal()
     try:
+        comic = db.query(Comic).filter(Comic.id == comic_id).first()
+        panel = db.query(Panel).filter(Panel.comic_id == comic_id, Panel.panel_number == panel_number).first()
+        job = db.query(GenerationJob).filter(GenerationJob.id == job_id).first()
+        if not comic or not panel or not job:
+            logger.error(f"run_panel_regeneration: missing entity for comic {comic_id}, panel {panel_number}")
+            return
+
         _update_job(db, job, "RUNNING", f"Regenerating panel {panel.panel_number}...")
 
         char_profile = char_svc.get_profile_dict(comic.character) if comic.character else {}
@@ -165,17 +181,31 @@ def run_panel_regeneration(
 
     except Exception as e:
         logger.exception(f"Panel regeneration failed: {e}")
-        _update_job(db, job, "FAILED", error=str(e))
+        try:
+            job = db.query(GenerationJob).filter(GenerationJob.id == job_id).first()
+            if job:
+                _update_job(db, job, "FAILED", error=str(e))
+        except Exception:
+            pass
+    finally:
+        db.close()
 
 
 def run_story_continuation(
-    db: Session,
-    parent_comic: Comic,
-    new_comic: Comic,
-    job: GenerationJob,
+    parent_comic_id: str,
+    new_comic_id: str,
+    job_id: str,
 ) -> None:
-    """Generate a continuation chapter from a parent comic."""
+    """Generate a continuation chapter from a parent comic in background thread."""
+    db: Session = SessionLocal()
     try:
+        parent_comic = db.query(Comic).filter(Comic.id == parent_comic_id).first()
+        new_comic = db.query(Comic).filter(Comic.id == new_comic_id).first()
+        job = db.query(GenerationJob).filter(GenerationJob.id == job_id).first()
+        if not parent_comic or not new_comic or not job:
+            logger.error(f"run_story_continuation: missing comic or job records")
+            return
+
         _update_job(db, job, "RUNNING", "Planning the next chapter...")
 
         parent_char_profile = char_svc.get_profile_dict(parent_comic.character) if parent_comic.character else {}
@@ -244,4 +274,11 @@ def run_story_continuation(
 
     except Exception as e:
         logger.exception(f"Story continuation failed: {e}")
-        _update_job(db, job, "FAILED", error=str(e))
+        try:
+            job = db.query(GenerationJob).filter(GenerationJob.id == job_id).first()
+            if job:
+                _update_job(db, job, "FAILED", error=str(e))
+        except Exception:
+            pass
+    finally:
+        db.close()

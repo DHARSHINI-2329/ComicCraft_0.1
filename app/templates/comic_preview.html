@@ -62,7 +62,7 @@
           <div class="panel-number">{{ panel.panel_number }}</div>
           <div class="panel-title">{{ panel.title }}</div>
           <button class="btn btn-sm btn-ghost regen-panel-btn"
-            onclick="regeneratePanel('{{ comic.id }}', {{ panel.panel_number }})"
+            onclick="regeneratePanel('{{ comic.id }}', '{{ panel.panel_number }}')"
             data-panel="{{ panel.panel_number }}"
             title="Regenerate this panel">
             <i class="fa-solid fa-arrows-rotate"></i>
@@ -72,7 +72,7 @@
         <!-- Panel Image -->
         <div class="panel-image-wrap">
           {% if panel.image_url %}
-          <img src="{{ panel.image_url }}" alt="{{ panel.title }}" class="panel-image" loading="lazy" />
+          <img src="{{ panel.image_url }}" alt="{{ panel.title }}" class="panel-image" loading="lazy" onerror="this.onerror=null; this.src='/static/images/comic-fallback.svg';" />
           {% elif panel.generation_status == 'FAILED' %}
           <div class="panel-image-placeholder error">
             <span><i class="fa-solid fa-triangle-exclamation"></i></span>

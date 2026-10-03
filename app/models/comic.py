@@ -1,9 +1,17 @@
 """Comic model."""
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from sqlalchemy import String, Text, DateTime, Integer, Boolean, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.database.database import Base
+
+if TYPE_CHECKING:
+    from app.models.user import User
+    from app.models.panel import Panel
+    from app.models.character import Character
+    from app.models.generation_job import GenerationJob
 
 
 class Comic(Base):
@@ -27,8 +35,8 @@ class Comic(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
-    user: Mapped["User"] = relationship("User", back_populates="comics")
-    panels: Mapped[list["Panel"]] = relationship("Panel", back_populates="comic", cascade="all, delete-orphan", order_by="Panel.panel_number")
-    character: Mapped[Optional["Character"]] = relationship("Character", back_populates="comic", uselist=False, cascade="all, delete-orphan")
-    generation_jobs: Mapped[list["GenerationJob"]] = relationship("GenerationJob", back_populates="comic", cascade="all, delete-orphan")
-    continuations: Mapped[list["Comic"]] = relationship("Comic", foreign_keys=[parent_comic_id])
+    user: Mapped[User] = relationship("User", back_populates="comics")
+    panels: Mapped[list[Panel]] = relationship("Panel", back_populates="comic", cascade="all, delete-orphan", order_by="Panel.panel_number")
+    character: Mapped[Optional[Character]] = relationship("Character", back_populates="comic", uselist=False, cascade="all, delete-orphan")
+    generation_jobs: Mapped[list[GenerationJob]] = relationship("GenerationJob", back_populates="comic", cascade="all, delete-orphan")
+    continuations: Mapped[list[Comic]] = relationship("Comic", foreign_keys=[parent_comic_id])
